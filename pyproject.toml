@@ -1,0 +1,26 @@
+[project]
+name = "grm-pymc-mirt"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "arviz>=0.23.4",
+    "graphviz>=0.21",
+    "jax<=0.7.0",
+    "jaxlib<=0.7.2",
+    "matplotlib>=3.10.9",
+    #"nest-asyncio>=1.6.0",
+    #"pystan>=3.10.1",
+    "numpyro>=0.20.1",
+    "pandas>=3.0.2",
+    "pymc>=5.28.4",
+    "pytensor>=2.38.2",
+]
+
+
+[dependency-groups]
+dev = [
+    "ipykernel>=7.2.0",
+    "nbconvert>=7.17.1",
+]
