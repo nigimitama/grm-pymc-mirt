@@ -90,6 +90,13 @@ write_csv(mirt_params, "./results/mirt_params.csv")
 mirt_params
 ```
 
+```{r}
+theta_mat <- fscores(fit, method="EAP")
+theta_df  <- data.frame(person=seq_len(nrow(theta_mat)), theta=theta_mat[, "F1"])
+write_csv(theta_df, "./results/mirt_theta.csv")
+theta_df
+```
+
 
 
 
