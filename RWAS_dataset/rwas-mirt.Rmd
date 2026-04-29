@@ -1,0 +1,103 @@
+---
+title: "mirt-rwas"
+output: html_document
+date: "2026-04-25"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r, include=FALSE}
+pacman::p_load(
+  "tidyverse", # for data wrangling
+  "mirt", # for conducting the main GRM analysis
+  "skimr"
+)
+```
+
+
+```{r}
+data <- read_csv("./RWAS/data.csv")
+responses <- data[1:22]
+responses
+```
+
+```{r}
+codebook <- readLines("./RWAS/codebook.txt")
+codebook
+```
+
+## 前処理
+
+https://onlinelibrary.wiley.com/doi/10.1002/ijop.13265
+
+が公開しているRmdファイルと同様の前処理を行う
+
+### 0は欠損値に思われる→削除
+
+> e have a few cases with `0` in all items. There is no explanation what `0` means in the codebook, but it is very likely that `0` is used to code a missing response. It is actually still possible to run an IRT analysis with missing data, but we have to ensure that the data are missing at random (MAR). One solution for this is simply exclude all cases with missing responses.
+
+
+```{r}
+responses <- responses %>%
+  mutate_all(~na_if(., 0)) %>%  # Replacing 0 with NA in all columns.
+  drop_na()  # Removing cases with any NA values.
+
+responses %>% min()
+```
+### 逆転項目の対処
+
+> As we see here, mean score of the items differ - some items have small mean scores (\~2-3), while the others are quite large (\~6-7). The reason for this is that the RWA scale has unfavorable items so to simplify the interpretation, we should reverse their scores.
+>
+> Unfavorable items are Q4, Q6, Q8, Q9, Q11, Q13, Q15, Q18, Q20, and Q21
+
+```{r}
+unfav <- c("Q4","Q6","Q8","Q9","Q11","Q13","Q15","Q18","Q20","Q21") # Now we create a vector defining which items will be coded reversely.
+responses[unfav]
+
+
+responses <- responses %>% 
+  mutate(across(all_of(unfav), ~ 10 - .))# We simply subtract the scores from 9 (the maximum) + 1 
+# to reverse code the unfavorable items.
+
+responses[unfav]
+
+rm(unfav) # We don't need the vector, so we remove it now to keep our workspace clean.
+```
+
+
+
+## model
+
+
+```{r}
+fit <- mirt(data=responses, itemtype="graded", SE=T, verbose=F)
+coefs <- as.data.frame(coef(fit, simplify=T, IRTpars=T)$items)
+coefs
+```
+
+```{r}
+coefs <- as.data.frame(coef(fit, simplify=T, IRTpars=T)$items)
+b_cols <- grep("^b", colnames(coefs), value=TRUE)
+b_mat  <- as.matrix(coefs[, b_cols])
+
+mirt_params <- data.frame(item=rownames(coefs), a=coefs$a, b_mat)
+
+dir.create("./results", showWarnings=FALSE)
+write_csv(mirt_params, "./results/mirt_params.csv")
+mirt_params
+```
+
+```{r}
+theta_mat <- fscores(fit, method="EAP")
+theta_df  <- data.frame(person=seq_len(nrow(theta_mat)), theta=theta_mat[, "F1"])
+write_csv(theta_df, "./results/mirt_theta.csv")
+theta_df
+```
+
+
+
+
+
