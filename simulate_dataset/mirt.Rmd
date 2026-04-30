@@ -1,0 +1,57 @@
+---
+title: "mirt-rwas"
+output: html_document
+date: "2026-04-25"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r, include=FALSE}
+pacman::p_load(
+  "tidyverse", # for data wrangling
+  "mirt", # for conducting the main GRM analysis
+  "skimr"
+)
+```
+
+
+```{r}
+data <- read_csv("./data.csv")
+data
+```
+
+
+## model
+
+
+```{r}
+fit <- mirt(data=data, itemtype="graded", SE=T, verbose=F)
+fit
+```
+
+```{r}
+coefs <- as.data.frame(coef(fit, simplify=T, IRTpars=T)$items)
+b_cols <- grep("^b", colnames(coefs), value=TRUE)
+b_mat  <- as.matrix(coefs[, b_cols])
+
+mirt_params <- data.frame(item=rownames(coefs), a=coefs$a, b_mat)
+
+dir.create("./results", showWarnings=FALSE)
+write_csv(mirt_params, "./results/mirt_params.csv")
+mirt_params
+```
+
+```{r}
+theta_mat <- fscores(fit, method="EAP")
+theta_df  <- data.frame(person=seq_len(nrow(theta_mat)), theta=theta_mat[, "F1"])
+write_csv(theta_df, "./results/mirt_theta.csv")
+theta_df
+```
+
+
+
+
+

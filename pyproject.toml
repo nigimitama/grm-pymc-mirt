@@ -16,6 +16,7 @@ dependencies = [
     "pandas>=3.0.2",
     "pymc>=5.28.4",
     "pytensor>=2.38.2",
+    "tabulate>=0.10.0",
 ]
 
 
