@@ -8,6 +8,7 @@
 - https://openpsychometrics.org/tests/RWAS/
 
 ### Implementation:
+
 - PyMC: [rwas-pymc.ipynb](./rwas-pymc.ipynb)
 - mirt: [rwas-mirt.Rmd](./rwas-mirt.Rmd)
     - ref. https://onlinelibrary.wiley.com/doi/10.1002/ijop.13265
