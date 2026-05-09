@@ -22,6 +22,35 @@ $$
 
 with $P(u_{ij} \geq 0) = 1$ and $P(u_{ij} \geq K_j) = 0$.
 
+## Connection to the Ordered Logistic Model
+
+GRM can be viewed as an **ordered logistic regression** with an IRT-specific parameterization. The standard ordered logistic model is:
+
+$$
+P(u_{ij} \geq k) = \sigma(\eta_{ij} - c_{jk})
+$$
+
+where $\eta_{ij}$ is a linear predictor and $c_{jk}$ are ordered cutpoints. Comparing with GRM:
+
+$$
+P(u_{ij} \geq k) = \sigma\!\left(a_j\theta_i - a_j b_{jk}\right)
+$$
+
+the correspondence is:
+
+| Ordered logistic | GRM |
+|-----------------|-----|
+| $\eta_{ij}$ (linear predictor) | $a_j \theta_i$ |
+| $c_{jk}$ (cutpoints) | $a_j b_{jk}$ |
+
+Both $a_j$ and $b_{jk}$ are item-specific, so the cutpoints are not shared across items — unlike a standard ordered logistic regression where cutpoints are typically global.
+
+PyMC's `pm.OrderedLogistic` implements exactly this $\sigma(\eta - c_k)$ form, which makes GRM a natural fit:
+
+```python
+pm.OrderedLogistic("Y_obs", eta=eta, cutpoints=c[item_idx], observed=Y.ravel())
+```
+
 ## PyMC Implementation
 
 ### Priors

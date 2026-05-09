@@ -22,6 +22,35 @@ $$
 
 ただし $P(u_{ij} \geq 0) = 1$、$P(u_{ij} \geq K_j) = 0$。
 
+## 順序ロジスティックモデルとの対応
+
+GRM は **順序ロジスティック回帰 (Ordered Logistic Regression)** を IRT 向けに特殊化したモデルと見なすことができます。標準的な順序ロジスティックモデルは次の形をしています。
+
+$$
+P(u_{ij} \geq k) = \sigma(\eta_{ij} - c_{jk})
+$$
+
+ここで $\eta_{ij}$ は線形予測子、$c_{jk}$ は順序制約付きのカットポイントです。GRM の累積確率と比較すると
+
+$$
+P(u_{ij} \geq k) = \sigma\!\left(a_j\theta_i - a_j b_{jk}\right)
+$$
+
+両者の対応は次のようになります。
+
+| 順序ロジスティック | GRM |
+|-----------------|-----|
+| $\eta_{ij}$（線形予測子） | $a_j \theta_i$ |
+| $c_{jk}$（カットポイント） | $a_j b_{jk}$ |
+
+通常の順序ロジスティック回帰ではカットポイントは全項目で共通ですが、GRM では $a_j$ と $b_{jk}$ がともに項目固有のパラメータであるため、カットポイントも項目ごとに異なります。
+
+PyMC の `pm.OrderedLogistic` はまさに $\sigma(\eta - c_k)$ の形を実装しており、GRM と自然に対応します。
+
+```python
+pm.OrderedLogistic("Y_obs", eta=eta, cutpoints=c[item_idx], observed=Y.ravel())
+```
+
 ## PyMC による実装
 
 ### 事前分布
